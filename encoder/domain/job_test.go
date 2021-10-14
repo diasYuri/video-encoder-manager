@@ -11,7 +11,7 @@ import (
 func TestNewJob(t *testing.T) {
 	video := domain.NewVideo()
 	video.ID = uuid.NewV4().String()
-	video.Filepath = "path"
+	video.FilePath = "path"
 	video.CreatedAt = time.Now()
 
 	job, err := domain.NewJob("path", "Converted", video)

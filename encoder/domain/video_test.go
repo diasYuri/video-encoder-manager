@@ -31,7 +31,7 @@ func TestVideoValidation(t *testing.T){
 	video.ID = uuid.NewV4().String()
 	video.CreatedAt = time.Now()
 	video.ResourceID = "a"
-	video.Filepath = "path"
+	video.FilePath = "path"
 
 	err := video.Validate()
 	require.Nil(t, err)
