@@ -19,7 +19,7 @@ type Database struct {
 	Env           string
 }
 
-func NewDb() *Database{
+func NewDb() *Database {
 	return &Database{}
 }
 
@@ -32,7 +32,7 @@ func NewDbTest() *gorm.DB {
 	dbInstance.Debug = true
 
 	conn, err := dbInstance.Connect()
-	if err != nil{
+	if err != nil {
 		log.Fatalf("Test db error: %v", err)
 	}
 
@@ -41,9 +41,9 @@ func NewDbTest() *gorm.DB {
 
 func (d *Database) Connect() (*gorm.DB, error) {
 	var err error
-	if d.Env != "Test"{
+	if d.Env != "Test" {
 		d.Db, err = gorm.Open(d.DbType, d.Dsn)
-	}else{
+	} else {
 		d.Db, err = gorm.Open(d.DbTypeTest, d.DsnTest)
 	}
 
@@ -55,7 +55,7 @@ func (d *Database) Connect() (*gorm.DB, error) {
 		d.Db.LogMode(true)
 	}
 
-	if d.AutoMigrateDB{
+	if d.AutoMigrateDB {
 		d.Db.AutoMigrate(&domain.Video{}, &domain.Job{})
 		d.Db.Model(domain.Job{}).AddForeignKey("video_id", "videos (id)", "CASCADE", "CASCADE")
 	}
