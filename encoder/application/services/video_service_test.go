@@ -5,12 +5,12 @@ import (
 	"github.com/diasYuri/encoder-go/application/services"
 	"github.com/diasYuri/encoder-go/domain"
 	"github.com/diasYuri/encoder-go/framework/database"
+	"github.com/joho/godotenv"
 	uuid "github.com/satori/go.uuid"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/require"
 	"testing"
 	"time"
-	"github.com/joho/godotenv"
 )
 
 func init(){
@@ -35,18 +35,7 @@ func prepare() (*domain.Video, repositories.VideoRepositoryDb){
 	return video, repo
 }
 
-func TestVideoServiceDownload(t *testing.T)  {
-	video, repo := prepare()
-
-	videoService := services.NewVideoService()
-	videoService.Video = video
-	videoService.VideoRepository = repo
-
-	err := videoService.Download("bucketTest")
-	require.Nil(t, err)
-}
-
-func TestVideoServiceFragment(t *testing.T)  {
+func TestVideoService(t *testing.T)  {
 	video, repo := prepare()
 
 	videoService := services.NewVideoService()
@@ -57,5 +46,11 @@ func TestVideoServiceFragment(t *testing.T)  {
 	require.Nil(t, err)
 
 	err = videoService.Fragment()
+	require.Nil(t, err)
+
+	err = videoService.Encode()
+	require.Nil(t, err)
+
+	err = videoService.Finish()
 	require.Nil(t, err)
 }
