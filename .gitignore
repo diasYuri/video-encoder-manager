@@ -1,3 +1,4 @@
 *.md
 .idea
 ./encoder/bucket-credential.json
+.pgdata
