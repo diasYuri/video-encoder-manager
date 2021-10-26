@@ -25,18 +25,17 @@ type JobNotificationError struct {
 	Error   string `json:"error"`
 }
 
-
 func NewJobManager(db *gorm.DB, rabbitMQ *queue.RabbitMQ, jobReturnChannel chan JobWorkerResult, messageChannel chan amqp.Delivery) *JobManager {
 	return &JobManager{
-		DB: db,
-		Domain: domain.Job{},
-		MessageChannel: messageChannel,
+		DB:               db,
+		Domain:           domain.Job{},
+		MessageChannel:   messageChannel,
 		JobReturnChannel: jobReturnChannel,
-		RabbitMQ: rabbitMQ,
+		RabbitMQ:         rabbitMQ,
 	}
 }
 
-func (j *JobManager) Start(ch *amqp.Channel)  {
+func (j *JobManager) Start(ch *amqp.Channel) {
 
 	videoService := NewVideoService()
 	videoService.VideoRepository = repositories.VideoRepositoryDb{Db: j.DB}
@@ -51,8 +50,7 @@ func (j *JobManager) Start(ch *amqp.Channel)  {
 		log.Fatalf("error loading var: CONCURRENCY_WORKERS")
 	}
 
-
-	for qtdProcesses := 0; qtdProcesses<concurrency; qtdProcesses++ {
+	for qtdProcesses := 0; qtdProcesses < concurrency; qtdProcesses++ {
 		go JobWorker(j.MessageChannel, j.JobReturnChannel, jobService, j.Domain, qtdProcesses)
 	}
 
@@ -71,9 +69,13 @@ func (j *JobManager) Start(ch *amqp.Channel)  {
 
 func (j *JobManager) checkParseErrors(jobResult JobWorkerResult) error {
 	if jobResult.Job.Error != "" {
-		log.Printf("MessageID #{jobResult.Message.DeliveryTag}. Error parsing job: #{jobResult.Job.ID}")
-	}else{
-		log.Printf("MessageID #{jobResult.Message.DeliveryTag}. Error parsing message: #{jobResult.Error}")
+		log.Printf("MessageID %v. Error during the job: %v with video: %v. Error: %v",
+			jobResult.Message.DeliveryTag,
+			jobResult.Job.ID,
+			jobResult.Job.Video.ID,
+			jobResult.Error.Error())
+	} else {
+		log.Printf("MessageID %v. Error parsing message: %v", jobResult.Message.DeliveryTag, jobResult.Error)
 	}
 
 	errorMsg := JobNotificationError{
@@ -88,7 +90,6 @@ func (j *JobManager) checkParseErrors(jobResult JobWorkerResult) error {
 		return err
 	}
 
-
 	err = jobResult.Message.Reject(false)
 	if err != nil {
 		return err
@@ -98,7 +99,9 @@ func (j *JobManager) checkParseErrors(jobResult JobWorkerResult) error {
 }
 
 func (j *JobManager) notifySuccess(jobResult JobWorkerResult, ch *amqp.Channel) error {
+	Mutex.Lock()
 	jobJson, err := json.Marshal(jobResult.Job)
+	Mutex.Unlock()
 	if err != nil {
 		return err
 	}
@@ -107,7 +110,6 @@ func (j *JobManager) notifySuccess(jobResult JobWorkerResult, ch *amqp.Channel) 
 	if err != nil {
 		return err
 	}
-
 
 	err = jobResult.Message.Ack(false)
 	if err != nil {
@@ -131,8 +133,3 @@ func (j *JobManager) notify(jobJson []byte) error {
 
 	return nil
 }
-
-
-
-
-
