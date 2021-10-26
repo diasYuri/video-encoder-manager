@@ -6,7 +6,7 @@ video encoder manager written in golang and using library bento4 to convert mp4 
 # Encoder Golang
 
 - Recebe uma mensagem via RabbitMQ informando qual o vídeo deve ser convertido
-- Faz download do vídeo no Google Clound Storage
+- Faz download do vídeo no Google Cloud Storage
 - Fragmenta o Vídeo
 - Converte o Vídeo para MPEG-DASH
 - Faz upload do vídeo no GCS
